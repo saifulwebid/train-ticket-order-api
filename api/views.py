@@ -3,43 +3,46 @@ from django.shortcuts import render
 # Create your views here.
 
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import *
 from .serializers import *
+from django.http import Http404
 
-@api_view(['GET', 'POST'])
-def stasiun_list(request, format=None):
-	if request.method == 'GET':
+class StasiunList(APIView):
+	def get(self, request, format=None):
 		stasiun = Stasiun.objects.all()
 		serializer = StasiunSerializer(stasiun, many=True)
 		return Response(serializer.data)
 
-	elif request.method == 'POST':
+	def post(self, request, format=None):
 		serializer = StasiunSerializer(data=request.data)
 		if serializer.is_valid():
 			serializer.save()
 			return Response(serializer.data, status=status.HTTP_201_CREATED)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET', 'PUT', 'DELETE'])
-def stasiun_detail(request, pk, format=None):
-	try:
-		stasiun = Stasiun.objects.get(pk=pk)
-	except Stasiun.DoesNotExist:
-		return Response(status=status.HTTP_404_NOT_FOUND)
+class StasiunDetail(APIView):
+	def get_object(self, pk):
+		try:
+			return Stasiun.objects.get(pk=pk)
+		except Stasiun.DoesNotExist:
+			raise Http404
 
-	if request.method == 'GET':
+	def get(self, request, pk, format=None):
+		stasiun = self.get_object(pk)
 		serializer = StasiunSerializer(stasiun)
 		return Response(serializer.data)
 
-	elif request.method == 'PUT':
+	def post(self, request, pk, format=None):
+		stasiun = self.get_object(pk)
 		serializer = StasiunSerializer(stasiun, data=request.data)
 		if serializer.is_valid():
 			serializer.save()
 			return Response(serializer.data)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-	elif request.method == 'DELETE':
-		snippet.delete()
+	def delete(self, request, pk, format=None):
+		stasiun = self.get_object(pk)
+		stasiun.delete()
 		return Response(status=status.HTTP_204_NO_CONTENT)
