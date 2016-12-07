@@ -67,7 +67,7 @@ class Pemesan(models.Model):
 
 class Penumpang(models.Model):
     id_penumpang = models.AutoField(primary_key=True)
-    booking = models.ForeignKey(Booking, models.DO_NOTHING, db_column='kode_booking')
+    booking = models.ForeignKey(Booking, models.DO_NOTHING, db_column='kode_booking', related_name='penumpang')
     nomor_identitas = models.CharField(max_length=24)
     nama_penumpang = models.CharField(max_length=64)
 
