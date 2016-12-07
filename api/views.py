@@ -13,3 +13,11 @@ class StasiunList(generics.ListCreateAPIView):
 class StasiunDetail(generics.RetrieveUpdateDestroyAPIView):
 	queryset = Stasiun.objects.all()
 	serializer_class = StasiunSerializer
+
+class BookingList(generics.ListCreateAPIView):
+	queryset = Booking.objects.all()
+	serializer_class = BookingSerializer
+
+class BookingDetail(generics.RetrieveUpdateDestroyAPIView):
+	queryset = Booking.objects.all()
+	serializer_class = BookingSerializer
