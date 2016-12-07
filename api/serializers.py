@@ -7,6 +7,8 @@ class KeretaSerializer(serializers.ModelSerializer):
 		fields = '__all__'
 
 class LayananKeretaSerializer(serializers.ModelSerializer):
+	kereta = KeretaSerializer()
+
 	class Meta:
 		model = LayananKereta
 		fields = '__all__'
@@ -32,6 +34,9 @@ class PenumpangSerializer(serializers.ModelSerializer):
 		fields = '__all__'
 
 class BookingSerializer(serializers.ModelSerializer):
+	pemesan = PemesanSerializer(read_only=True)
+	penumpang = PenumpangSerializer(many=True, read_only=True)
+
 	class Meta:
 		model = Booking
 		fields = '__all__'
