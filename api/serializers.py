@@ -9,7 +9,9 @@ class KeretaSerializer(serializers.ModelSerializer):
 
 
 class LayananKeretaSerializer(serializers.ModelSerializer):
-    kereta = KeretaSerializer()
+    kereta = KeretaSerializer(read_only=True)
+    id_kereta = serializers.PrimaryKeyRelatedField(
+        queryset=Kereta.objects.all(), source='kereta')
 
     class Meta:
         model = LayananKereta
