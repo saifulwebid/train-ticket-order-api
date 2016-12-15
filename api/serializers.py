@@ -16,9 +16,9 @@ class LayananKeretaSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class TipePembayaranSerializer(serializers.ModelSerializer):
+class CaraBayarSerializer(serializers.ModelSerializer):
     class Meta:
-        model = TipePembayaran
+        model = CaraBayar
         fields = '__all__'
 
 
