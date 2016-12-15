@@ -13,6 +13,16 @@ class StasiunDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = StasiunSerializer
 
 
+class LayananKeretaList(generics.ListCreateAPIView):
+    queryset = LayananKereta.objects.all()
+    serializer_class = LayananKeretaSerializer
+
+
+class LayananKeretaDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = LayananKereta.objects.all()
+    serializer_class = LayananKeretaSerializer
+
+
 class BookingList(generics.ListCreateAPIView):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
