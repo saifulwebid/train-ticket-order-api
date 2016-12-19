@@ -33,7 +33,7 @@ class PembayaranSerializer(serializers.ModelSerializer):
 class PemesanSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pemesan
-        fields = '__all__'
+        exclude = ('booking', )
 
 
 class PenumpangSerializer(serializers.ModelSerializer):

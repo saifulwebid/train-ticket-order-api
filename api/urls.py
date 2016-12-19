@@ -7,6 +7,7 @@ urlpatterns = [
     url(r'^stasiun/(?P<pk>[A-Z]+)/$', views.StasiunDetail.as_view()),
     url(r'^booking/$', views.BookingList.as_view()),
     url(r'^booking/(?P<pk>[0-9]+)/$', views.BookingDetail.as_view()),
+    url(r'^booking/(?P<pk>[0-9]+)/pemesan/$', views.PemesanDetail.as_view()),
     url(r'^layanan/$', views.LayananKeretaList.as_view()),
     url(r'^layanan/(?P<pk>[0-9]+)/$',
         views.LayananKeretaDetail.as_view()),

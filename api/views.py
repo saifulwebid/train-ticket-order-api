@@ -31,3 +31,9 @@ class BookingList(generics.ListCreateAPIView):
 class BookingDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
+
+
+class PemesanDetail(generics.RetrieveUpdateAPIView,
+        generics.CreateAPIView):
+    queryset = Pemesan.objects.all()
+    serializer_class = PemesanSerializer
