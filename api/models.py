@@ -1,13 +1,15 @@
 from __future__ import unicode_literals
 from django.db import models
+from datetime import datetime
 
 
 class Booking(models.Model):
     kode_booking = models.AutoField(primary_key=True)
-    layanan_kereta = models.ForeignKey(
-        'LayananKereta', models.DO_NOTHING, db_column='id_layanan_kereta')
+    id_layanan_kereta = models.ForeignKey(
+        'LayananKereta', db_column='id_layanan_kereta')
     jumlah_penumpang = models.IntegerField()
-    waktu_mulai_booking = models.DateTimeField()
+    waktu_mulai_booking = models.DateTimeField(
+        default=datetime.now, blank=True)
 
     class Meta:
         managed = False
@@ -35,8 +37,7 @@ class Kereta(models.Model):
 
 class LayananKereta(models.Model):
     id_layanan_kereta = models.AutoField(primary_key=True)
-    kereta = models.ForeignKey(
-        Kereta, models.DO_NOTHING, db_column='id_kereta')
+    id_kereta = models.ForeignKey(Kereta, db_column='id_kereta')
     kapasitas = models.IntegerField()
     harga_tiket = models.IntegerField()
 
@@ -47,11 +48,10 @@ class LayananKereta(models.Model):
 
 class Pembayaran(models.Model):
     kode_pembayaran = models.AutoField(primary_key=True)
-    booking = models.ForeignKey(
-        Booking, models.DO_NOTHING, db_column='kode_booking')
-    cara_bayar = models.ForeignKey(
-        CaraBayar, models.DO_NOTHING, db_column='id_cara_bayar')
-    waktu_penagihan = models.DateTimeField()
+    kode_booking = models.ForeignKey(Booking, db_column='kode_booking')
+    id_cara_bayar = models.ForeignKey(CaraBayar, db_column='id_cara_bayar')
+    waktu_penagihan = models.DateTimeField(default=datetime.now, blank=True)
+
     waktu_pembayaran = models.DateTimeField(blank=True, null=True)
 
     class Meta:
@@ -60,8 +60,8 @@ class Pembayaran(models.Model):
 
 
 class Pemesan(models.Model):
-    booking = models.OneToOneField(
-        Booking, models.DO_NOTHING, db_column='kode_booking', primary_key=True)
+    kode_booking = models.ForeignKey(
+        Booking, db_column='kode_booking', primary_key=True)
     nama_pemesan = models.CharField(max_length=64)
     email_pemesan = models.CharField(max_length=64)
     nomor_telepon_pemesan = models.CharField(max_length=16)
@@ -74,24 +74,22 @@ class Pemesan(models.Model):
 
 class Penumpang(models.Model):
     id_penumpang = models.AutoField(primary_key=True)
-    booking = models.ForeignKey(
-        Booking, models.DO_NOTHING, db_column='kode_booking',
-        related_name='penumpang')
+    kode_booking = models.ForeignKey(Booking, db_column='kode_booking')
     nomor_identitas = models.CharField(max_length=24)
     nama_penumpang = models.CharField(max_length=64)
 
     class Meta:
         managed = False
         db_table = 'penumpang'
-        unique_together = (('booking', 'nomor_identitas'),)
+        unique_together = (('kode_booking', 'nomor_identitas'),)
 
 
 class RangkaianPerjalanan(models.Model):
     id_rangkaian_perjalanan = models.AutoField(primary_key=True)
-    layanan_kereta = models.ForeignKey(
-        LayananKereta, models.DO_NOTHING, db_column='id_layanan_kereta')
-    stasiun = models.ForeignKey(
-        'Stasiun', models.DO_NOTHING, db_column='id_stasiun')
+    id_layanan_kereta = models.ForeignKey(
+        LayananKereta, db_column='id_layanan_kereta')
+    id_stasiun = models.ForeignKey('Stasiun', db_column='id_stasiun')
+
     jenis_perjalanan = models.CharField(max_length=1)
     waktu = models.DateTimeField()
 
@@ -99,7 +97,7 @@ class RangkaianPerjalanan(models.Model):
         managed = False
         db_table = 'rangkaian_perjalanan'
         unique_together = (
-            ('layanan_kereta', 'stasiun', 'jenis_perjalanan'),)
+            ('id_layanan_kereta', 'id_stasiun', 'jenis_perjalanan'),)
 
 
 class Stasiun(models.Model):
