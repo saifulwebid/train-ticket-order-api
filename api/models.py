@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 from django.db import models
 from django.db.models import Sum
+from django.utils import timezone
 
 
 class Booking(models.Model):
@@ -9,6 +10,20 @@ class Booking(models.Model):
         'LayananKereta', models.DO_NOTHING, db_column='id_layanan_kereta')
     jumlah_penumpang = models.IntegerField()
     waktu_mulai_booking = models.DateTimeField()
+
+    def __get_valid_status(self):
+        waktu_sekarang = timezone.now()
+        waktu_booking = self.waktu_mulai_booking
+        delta = waktu_sekarang - waktu_booking
+
+        if self.penumpang.count() != self.jumlah_penumpang:
+            # Proses input penumpang belum selesai
+            return delta.total_seconds() <= 600
+
+        # TODO: Cek validitas untuk proses pembayaran 2 jam
+        return True
+
+    valid_status = property(__get_valid_status)
 
     class Meta:
         managed = False
