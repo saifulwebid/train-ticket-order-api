@@ -1,7 +1,8 @@
 from __future__ import unicode_literals
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.utils import timezone
+from datetime import timedelta
 
 
 class Booking(models.Model):
@@ -64,7 +65,13 @@ class LayananKereta(models.Model):
     harga_tiket = models.IntegerField()
 
     def __hitung_sisa_kursi(self):
-        count = self.booking_set.aggregate(Sum('jumlah_penumpang'))
+        durasi_pengisian = timezone.now() - timedelta(minutes=10)
+        durasi_pembayaran = timezone.now() - timedelta(hours=2)
+        count = self.booking_set.filter(
+            Q(waktu_mulai_booking__gte=durasi_pengisian) |
+            Q(pembayaran__waktu_penagihan__gte=durasi_pembayaran) |
+            Q(pembayaran__waktu_pembayaran__isnull=False))
+        count = count.aggregate(Sum('jumlah_penumpang'))
 
         if count["jumlah_penumpang__sum"] is None:
             count["jumlah_penumpang__sum"] = 0
