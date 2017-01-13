@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^penumpang/$',views.PenumpangList.as_view()),
     url(r'^pembayaran/$',views.PembayaranList.as_view()),
     url(r'^pembayaran/(?P<pk>[0-9]+)/$',views.PembayaranDetail.as_view()),
+    url(r'^carabayar/$',views.CaraBayarList.as_view()),
     url(r'^booking/(?P<pembayaran>\d+)/$',views.BookingDetail.as_view()),
     url(r'^booking/$',views.BookingList.as_view()),
 ]
