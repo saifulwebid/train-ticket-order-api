@@ -18,9 +18,16 @@ class Booking(models.Model):
 
         if self.penumpang.count() != self.jumlah_penumpang:
             # Proses input penumpang belum selesai
-            return delta.total_seconds() <= 600
+            return delta.total_seconds() <= 600  # 10 menit
 
-        # TODO: Cek validitas untuk proses pembayaran 2 jam
+        # Cek status pembayaran
+        if hasattr(self, 'pembayaran'):
+            if self.pembayaran.waktu_pembayaran is None:
+                # Belum dibayar; jangka waktu pembayaran 2 jam
+                delta = waktu_sekarang - self.pembayaran.waktu_penagihan
+                return delta.total_seconds() <= 7200  # 2 jam
+
+        # Sudah dibayar
         return True
 
     valid_status = property(__get_valid_status)
@@ -73,7 +80,7 @@ class LayananKereta(models.Model):
 
 class Pembayaran(models.Model):
     kode_pembayaran = models.AutoField(primary_key=True)
-    booking = models.ForeignKey(
+    booking = models.OneToOneField(
         Booking, models.DO_NOTHING, db_column='kode_booking')
     cara_bayar = models.ForeignKey(
         CaraBayar, models.DO_NOTHING, db_column='id_cara_bayar')
