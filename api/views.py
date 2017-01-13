@@ -33,7 +33,7 @@ class BookingDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BookingSerializer
 
 
-class PemesanDetail(generics.RetrieveUpdateAPIView,
-        generics.CreateAPIView):
+class PemesanDetail(
+        generics.RetrieveUpdateAPIView, generics.CreateAPIView):
     queryset = Pemesan.objects.all()
     serializer_class = PemesanSerializer
