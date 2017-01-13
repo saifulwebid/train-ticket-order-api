@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 from django.db import models
+from django.db.models import Sum
 
 
 class Booking(models.Model):
@@ -39,6 +40,16 @@ class LayananKereta(models.Model):
         Kereta, models.DO_NOTHING, db_column='id_kereta')
     kapasitas = models.IntegerField()
     harga_tiket = models.IntegerField()
+
+    def __hitung_sisa_kursi(self):
+        count = self.booking_set.aggregate(Sum('jumlah_penumpang'))
+
+        if count["jumlah_penumpang__sum"] is None:
+            count["jumlah_penumpang__sum"] = 0
+
+        return self.kapasitas - count["jumlah_penumpang__sum"]
+
+    sisa_kursi = property(__hitung_sisa_kursi)
 
     class Meta:
         managed = False
@@ -89,7 +100,8 @@ class Penumpang(models.Model):
 class RangkaianPerjalanan(models.Model):
     id_rangkaian_perjalanan = models.AutoField(primary_key=True)
     layanan_kereta = models.ForeignKey(
-        LayananKereta, models.DO_NOTHING, db_column='id_layanan_kereta')
+        LayananKereta, models.DO_NOTHING, db_column='id_layanan_kereta',
+        related_name='rangkaian_perjalanan')
     stasiun = models.ForeignKey(
         'Stasiun', models.DO_NOTHING, db_column='id_stasiun')
     jenis_perjalanan = models.CharField(max_length=1)

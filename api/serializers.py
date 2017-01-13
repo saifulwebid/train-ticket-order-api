@@ -8,14 +8,20 @@ class KeretaSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class RangkaianPerjalananSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RangkaianPerjalanan
+        fields = '__all__'
+
+
 class LayananKeretaSerializer(serializers.ModelSerializer):
-    kereta = KeretaSerializer(read_only=True)
-    id_kereta = serializers.PrimaryKeyRelatedField(
-        queryset=Kereta.objects.all(), source='kereta')
+    kereta = KeretaSerializer()
+    rangkaian_perjalanan = RangkaianPerjalanan()
+    sisa_kursi = serializers.IntegerField()
 
     class Meta:
         model = LayananKereta
-        fields = '__all__'
+        exclude = ('id_layanan_kereta', )
 
 
 class CaraBayarSerializer(serializers.ModelSerializer):
@@ -53,12 +59,6 @@ class BookingSerializer(serializers.ModelSerializer):
         model = Booking
         fields = '__all__'
         depth = 1
-
-
-class RangkaianPerjalananSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = RangkaianPerjalanan
-        fields = '__all__'
 
 
 class StasiunSerializer(serializers.ModelSerializer):
