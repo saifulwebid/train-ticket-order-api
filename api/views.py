@@ -3,22 +3,22 @@ from .models import *
 from .serializers import *
 
 
-class StasiunList(generics.ListCreateAPIView):
+class StasiunList(generics.ListAPIView):
     queryset = Stasiun.objects.all()
     serializer_class = StasiunSerializer
 
 
-class StasiunDetail(generics.RetrieveUpdateDestroyAPIView):
+class StasiunDetail(generics.RetrieveAPIView):
     queryset = Stasiun.objects.all()
     serializer_class = StasiunSerializer
 
 
-class LayananKeretaList(generics.ListCreateAPIView):
+class LayananKeretaList(generics.ListAPIView):
     queryset = LayananKereta.objects.all()
     serializer_class = LayananKeretaSerializer
 
 
-class LayananKeretaDetail(generics.RetrieveUpdateDestroyAPIView):
+class LayananKeretaDetail(generics.RetrieveAPIView):
     queryset = LayananKereta.objects.all()
     serializer_class = LayananKeretaSerializer
 
