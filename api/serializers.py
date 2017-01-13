@@ -21,7 +21,7 @@ class LayananKeretaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = LayananKereta
-        exclude = ('id_layanan_kereta', )
+        fields = '__all__'
 
 
 class CaraBayarSerializer(serializers.ModelSerializer):
