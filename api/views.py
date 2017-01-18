@@ -35,7 +35,7 @@ class BookingList(generics.ListCreateAPIView):
         serializer.save(waktu_mulai_booking=timezone.now())
 
 
-class BookingDetail(generics.RetrieveUpdateDestroyAPIView):
+class BookingDetail(generics.RetrieveAPIView):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
 
