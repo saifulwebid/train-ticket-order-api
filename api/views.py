@@ -12,14 +12,6 @@ class StasiunList(generics.ListAPIView):
     serializer_class = StasiunSerializer
 
 
-class StasiunDetail(generics.RetrieveAPIView):
-    queryset = Stasiun.objects.all()
-    serializer_class = StasiunSerializer
-
-
-class LayananKeretaList(generics.ListAPIView):
-    queryset = LayananKereta.objects.all()
-    serializer_class = LayananKeretaSerializer
 
 
 class LayananKeretaDetail(generics.RetrieveAPIView):
