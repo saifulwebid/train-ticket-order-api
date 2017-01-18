@@ -84,10 +84,10 @@ DATABASES = {
     # }
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'webdev16_ticket_order',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
+        'NAME': 'webdev16db',
+        'USER': 'b9bd3c4d513de4',
+        'PASSWORD': 'eca8c767',
+        'HOST': 'ap-cdbr-azure-southeast-b.cloudapp.net',
         'PORT': '3306'
     }
 }
