@@ -31,10 +31,8 @@ class CaraBayarDariBooking(generics.GenericAPIView):
             queryset = Pembayaran.objects.get(booking=booking).cara_bayar
         except ObjectDoesNotExist:
             return Response(
-                {"detail": "Not found."},
-                status=status.HTTP_404_NOT_FOUND)
+                {"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        print(repr(queryset))
         serializer = CaraBayarSerializer(queryset)
         return Response(serializer.data)
 
@@ -43,8 +41,7 @@ class CaraBayarDariBooking(generics.GenericAPIView):
             booking = Booking.objects.get(kode_booking=int(pk))
         except ObjectDoesNotExist:
             return Response(
-                {"detail": "Not found."},
-                status=status.HTTP_404_NOT_FOUND)
+                {"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
         if hasattr(booking, 'pembayaran'):
             return Response(
@@ -100,7 +97,8 @@ class PenumpangDetail(generics.ListCreateAPIView):
     serializer_class = PenumpangSerializer
 
     def get_queryset(self):
-        return Booking.objects.get(kode_booking=self.kode_booking).penumpang.all()
+        return Booking.objects.get(
+            kode_booking=self.kode_booking).penumpang.all()
 
     def get(self, request, pk, *args, **kwargs):
         self.kode_booking = pk
@@ -157,6 +155,7 @@ class BayarBooking(generics.GenericAPIView):
             pembayaran = Pembayaran.objects.get(
                 kode_pembayaran=request.data.get("kode_pembayaran"))
             response_serializer = PembayaranSerializer(pembayaran)
-            return Response(response_serializer.data, status=status.HTTP_202_ACCEPTED)
+            return Response(
+                response_serializer.data, status=status.HTTP_202_ACCEPTED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

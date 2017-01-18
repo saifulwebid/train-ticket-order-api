@@ -1,18 +1,11 @@
 from rest_framework import serializers
 from .models import *
-from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 
 
 class KeretaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Kereta
-        fields = '__all__'
-
-
-class RangkaianPerjalananSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = RangkaianPerjalanan
         fields = '__all__'
 
 
@@ -32,13 +25,6 @@ class CaraBayarSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class PembayaranSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Pembayaran
-        exclude = ('booking', )
-        depth = 1
-
-
 class WritePembayaranSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pembayaran
@@ -52,9 +38,10 @@ class BayarBookingSerializer(serializers.ModelSerializer):
         try:
             pembayaran = Pembayaran.objects.get(kode_pembayaran=value)
         except ObjectDoesNotExist:
-            raise serializers.ValidationError("Kode pembayaran does not exists")
+            raise serializers.ValidationError(
+                "Kode pembayaran does not exists")
 
-        if not pembayaran.waktu_pembayaran is None:
+        if pembayaran.waktu_pembayaran is not None:
             raise serializers.ValidationError("Booking sudah dibayar")
 
         return value
