@@ -37,6 +37,12 @@ class PembayaranSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class WritePembayaranSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pembayaran
+        exclude = ('booking', 'waktu_pembayaran', 'waktu_penagihan')
+
+
 class PemesanSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pemesan

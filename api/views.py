@@ -5,6 +5,7 @@ from .models import *
 from .serializers import *
 from datetime import datetime
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class StasiunList(generics.ListAPIView):
@@ -15,6 +16,49 @@ class StasiunList(generics.ListAPIView):
 class CaraBayarList(generics.ListAPIView):
     queryset = CaraBayar.objects.all()
     serializer_class = CaraBayarSerializer
+
+
+class CaraBayarDariBooking(generics.GenericAPIView):
+    def get_serializer_class(self):
+        if self.request.method == "GET":
+            return CaraBayarSerializer
+
+        return WritePembayaranSerializer
+
+    def get(self, request, pk, *args, **kwargs):
+        try:
+            booking = Booking.objects.get(kode_booking=int(pk))
+            queryset = Pembayaran.objects.get(booking=booking).cara_bayar
+        except ObjectDoesNotExist:
+            return Response(
+                {"detail": "Not found."},
+                status=status.HTTP_404_NOT_FOUND)
+
+        print(repr(queryset))
+        serializer = CaraBayarSerializer(queryset)
+        return Response(serializer.data)
+
+    def post(self, request, pk, *args, **kwargs):
+        try:
+            booking = Booking.objects.get(kode_booking=int(pk))
+        except ObjectDoesNotExist:
+            return Response(
+                {"detail": "Not found."},
+                status=status.HTTP_404_NOT_FOUND)
+
+        if hasattr(booking, 'pembayaran'):
+            return Response(
+                {"detail": "Pembayaran already exists."},
+                status=status.HTTP_409_CONFLICT)
+
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(
+                booking=booking,
+                waktu_penagihan=timezone.now())
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LayananKeretaDetail(generics.RetrieveAPIView):
