@@ -53,6 +53,9 @@ class CaraBayarDariBooking(generics.GenericAPIView):
             serializer.save(
                 booking=booking,
                 waktu_penagihan=timezone.now())
+
+            pembayaran = Pembayaran.objects.get(booking_id=int(pk))
+            serializer = PembayaranSerializer(pembayaran)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
