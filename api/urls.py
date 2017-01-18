@@ -13,7 +13,8 @@ urlpatterns = [
     url(r'^layanan/(?P<pk>[0-9]+)/$',
         views.LayananKeretaDetail.as_view()),
     url(r'^layanan/(?P<tahun>\d+)/(?P<bulan>\d+)/(?P<tanggal>\d+)/(?P<asal>.+)/(?P<tujuan>.+)/$',
-        views.CariLayananKereta.as_view())
+        views.CariLayananKereta.as_view()),
+    url(r'^pembayaran/$', views.BayarBooking.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

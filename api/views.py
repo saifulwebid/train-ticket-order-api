@@ -137,3 +137,26 @@ class CariLayananKereta(APIView):
         queryset = LayananKereta.cari(tanggal_berangkat, asal, tujuan)
         serializer = LayananKeretaSerializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class BayarBooking(generics.GenericAPIView):
+    queryset = Pembayaran.objects.all()
+    serializer_class = BayarBookingSerializer
+
+    def post(self, request, *args, **kwargs):
+        try:
+            pembayaran = Pembayaran.objects.get(
+                kode_pembayaran=request.data.get("kode_pembayaran"))
+        except ObjectDoesNotExist:
+            pembayaran = None
+
+        serializer = BayarBookingSerializer(pembayaran, data=request.data)
+        if serializer.is_valid():
+            serializer.save(waktu_pembayaran=timezone.now())
+
+            pembayaran = Pembayaran.objects.get(
+                kode_pembayaran=request.data.get("kode_pembayaran"))
+            response_serializer = PembayaranSerializer(pembayaran)
+            return Response(response_serializer.data, status=status.HTTP_202_ACCEPTED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

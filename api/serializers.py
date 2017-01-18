@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import *
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class KeretaSerializer(serializers.ModelSerializer):
@@ -34,13 +35,42 @@ class CaraBayarSerializer(serializers.ModelSerializer):
 class PembayaranSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pembayaran
-        fields = '__all__'
+        exclude = ('booking', )
+        depth = 1
 
 
 class WritePembayaranSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pembayaran
         exclude = ('booking', 'waktu_pembayaran', 'waktu_penagihan')
+
+
+class BayarBookingSerializer(serializers.ModelSerializer):
+    kode_pembayaran = serializers.IntegerField()
+
+    def validate_kode_pembayaran(self, value):
+        try:
+            pembayaran = Pembayaran.objects.get(kode_pembayaran=value)
+        except ObjectDoesNotExist:
+            raise serializers.ValidationError("Kode pembayaran does not exists")
+
+        if not pembayaran.waktu_pembayaran is None:
+            raise serializers.ValidationError("Booking sudah dibayar")
+
+        return value
+
+    class Meta:
+        model = Pembayaran
+        fields = ('kode_pembayaran', )
+
+
+class PembayaranSerializer(serializers.ModelSerializer):
+    kode_booking = serializers.IntegerField(source='booking.kode_booking')
+
+    class Meta:
+        model = Pembayaran
+        exclude = ('booking', )
+        depth = 1
 
 
 class PemesanSerializer(serializers.ModelSerializer):
