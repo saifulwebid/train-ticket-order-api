@@ -43,6 +43,12 @@ class PemesanSerializer(serializers.ModelSerializer):
         exclude = ('booking', )
 
 
+class WritePemesanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pemesan
+        fields = '__all__'
+
+
 class PenumpangSerializer(serializers.ModelSerializer):
     class Meta:
         model = Penumpang

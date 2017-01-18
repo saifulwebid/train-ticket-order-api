@@ -1,4 +1,4 @@
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import *
@@ -36,9 +36,19 @@ class BookingDetail(generics.RetrieveAPIView):
 
 
 class PemesanDetail(
-        generics.RetrieveUpdateAPIView, generics.CreateAPIView):
+        generics.RetrieveAPIView):
     queryset = Pemesan.objects.all()
     serializer_class = PemesanSerializer
+
+    def post(self, request, pk, *args, **kwargs):
+        booking = Booking.objects.get(kode_booking=pk)
+
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(booking=booking)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CariLayananKereta(APIView):
