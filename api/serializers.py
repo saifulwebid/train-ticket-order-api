@@ -50,6 +50,8 @@ class PenumpangSerializer(serializers.ModelSerializer):
 
 
 class WriteBookingSerializer(serializers.ModelSerializer):
+    jumlah_penumpang = serializers.IntegerField(min_value=1, max_value=4)
+
     class Meta:
         model = Booking
         exclude = ('waktu_mulai_booking', )
