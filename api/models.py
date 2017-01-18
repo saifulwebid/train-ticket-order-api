@@ -111,6 +111,11 @@ class Pembayaran(models.Model):
     waktu_penagihan = models.DateTimeField()
     waktu_pembayaran = models.DateTimeField(blank=True, null=True)
 
+    def __get_batas_akhir_pembayaran(self):
+        return self.waktu_penagihan + timedelta(seconds=60 * 60 * 2)
+
+    batas_akhir_pembayaran = property(__get_batas_akhir_pembayaran)
+
     class Meta:
         managed = False
         db_table = 'pembayaran'

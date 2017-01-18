@@ -88,6 +88,7 @@ class BayarBookingSerializer(serializers.ModelSerializer):
 
 class PembayaranSerializer(serializers.ModelSerializer):
     kode_booking = serializers.IntegerField(source='booking.kode_booking')
+    batas_akhir_pembayaran = serializers.DateTimeField()
 
     class Meta:
         model = Pembayaran
