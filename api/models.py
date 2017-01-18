@@ -80,6 +80,23 @@ class LayananKereta(models.Model):
 
     sisa_kursi = property(__hitung_sisa_kursi)
 
+    def cari(tanggal_berangkat, asal, tujuan):
+        range_akhir = tanggal_berangkat + timedelta(days=1)
+        args = [tanggal_berangkat, range_akhir, asal, tujuan]
+        queryset = LayananKereta.objects.raw(
+            '''SELECT lk.* FROM layanan_kereta lk, rangkaian_perjalanan asal,
+            rangkaian_perjalanan tujuan
+                WHERE lk.id_layanan_kereta = asal.id_layanan_kereta
+                    AND asal.id_layanan_kereta = tujuan.id_layanan_kereta
+                    AND asal.jenis_perjalanan = "B"
+                    AND tujuan.jenis_perjalanan = "D"
+                    AND asal.waktu < tujuan.waktu
+                    AND asal.waktu
+                        BETWEEN %s AND %s
+                    AND asal.id_stasiun = %s
+                    AND tujuan.id_stasiun = %s''', args)
+        return queryset
+
     class Meta:
         managed = False
         db_table = 'layanan_kereta'
