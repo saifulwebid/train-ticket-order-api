@@ -120,7 +120,7 @@ class BookingSerializer(serializers.ModelSerializer):
     penumpang = PenumpangSerializer(many=True, read_only=True)
     pembayaran = PembayaranSerializer(read_only=True)
     layanan_kereta = LayananKeretaSerializer(read_only=True)
-    valid_status = serializers.BooleanField()
+    valid = serializers.BooleanField()
 
     class Meta:
         model = Booking

@@ -12,7 +12,7 @@ class Booking(models.Model):
     jumlah_penumpang = models.IntegerField()
     waktu_mulai_booking = models.DateTimeField()
 
-    def __get_valid_status(self):
+    def __get_valid(self):
         waktu_sekarang = timezone.now()
         waktu_booking = self.waktu_mulai_booking
         delta = waktu_sekarang - waktu_booking
@@ -31,7 +31,7 @@ class Booking(models.Model):
         # Sudah dibayar
         return True
 
-    valid_status = property(__get_valid_status)
+    valid = property(__get_valid)
 
     class Meta:
         managed = False
