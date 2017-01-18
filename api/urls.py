@@ -16,6 +16,8 @@ urlpatterns = [
     url(r'^layanan/(?P<tahun>\d+)/(?P<bulan>\d+)/(?P<tanggal>\d+)/(?P<asal>.+)/(?P<tujuan>.+)/$',
         views.CariLayananKereta.as_view()),
     url(r'^pembayaran/$', views.BayarBooking.as_view()),
+    url(r'^cek-kode-booking/(?P<kode_bayar>[0-9]+)/$',
+        views.CekKodeBooking.as_view())
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

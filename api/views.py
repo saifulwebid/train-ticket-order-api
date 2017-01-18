@@ -160,3 +160,21 @@ class BayarBooking(generics.GenericAPIView):
                 response_serializer.data, status=status.HTTP_202_ACCEPTED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CekKodeBooking(APIView):
+    def get(self, request, kode_bayar, *args, **kwargs):
+        try:
+            pembayaran = Pembayaran.objects.get(kode_pembayaran=kode_bayar)
+        except ObjectDoesNotExist:
+            return Response(
+                {"detail": "Kode pembayaran tidak ditemukan."},
+                status=status.HTTP_404_NOT_FOUND)
+
+        pembayaran.booking.kode_booking
+        if pembayaran.waktu_pembayaran is None:
+            pembayaran.booking.kode_booking = None
+
+        serializer = BookingSerializer(pembayaran.booking)
+
+        return Response(serializer.data)
