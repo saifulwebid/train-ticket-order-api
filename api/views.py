@@ -12,6 +12,9 @@ class StasiunList(generics.ListAPIView):
     serializer_class = StasiunSerializer
 
 
+class CaraBayarList(generics.ListAPIView):
+    queryset = CaraBayar.objects.all()
+    serializer_class = CaraBayarSerializer
 
 
 class LayananKeretaDetail(generics.RetrieveAPIView):
