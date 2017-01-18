@@ -51,6 +51,7 @@ class PenumpangSerializer(serializers.ModelSerializer):
 class BookingSerializer(serializers.ModelSerializer):
     pemesan = PemesanSerializer(read_only=True)
     penumpang = PenumpangSerializer(many=True, read_only=True)
+    pembayaran = PembayaranSerializer(read_only=True)
     layanan_kereta = LayananKeretaSerializer(read_only=True)
     valid_status = serializers.BooleanField()
 
