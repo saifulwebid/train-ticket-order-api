@@ -22,14 +22,9 @@ class LayananKeretaDetail(generics.RetrieveAPIView):
     serializer_class = LayananKeretaSerializer
 
 
-class BookingList(generics.ListCreateAPIView):
+class BookingList(generics.CreateAPIView):
     queryset = Booking.objects.all()
-
-    def get_serializer_class(self):
-        if self.request.method == "POST":
-            return WriteBookingSerializer
-
-        return BookingSerializer
+    serializer_class = WriteBookingSerializer
 
     def perform_create(self, serializer):
         serializer.save(waktu_mulai_booking=timezone.now())
