@@ -133,7 +133,8 @@ class CariLayananKereta(APIView):
         tanggal_berangkat = tanggal_berangkat.replace(tzinfo=None)
 
         queryset = LayananKereta.cari(tanggal_berangkat, asal, tujuan)
-        serializer = LayananKeretaSerializer(queryset, many=True)
+        serializer = LayananKeretaLookupSerializer(
+            queryset, many=True, context={'asal': asal, 'tujuan': tujuan})
         return Response(serializer.data)
 
 

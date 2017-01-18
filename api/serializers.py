@@ -11,8 +11,43 @@ class KeretaSerializer(serializers.ModelSerializer):
 
 class LayananKeretaSerializer(serializers.ModelSerializer):
     kereta = KeretaSerializer()
-    rangkaian_perjalanan = RangkaianPerjalanan()
+
+    class Meta:
+        model = LayananKereta
+        exclude = ('kapasitas', )
+
+
+class LayananKeretaLookupSerializer(serializers.ModelSerializer):
+    kereta = KeretaSerializer()
     sisa_kursi = serializers.IntegerField()
+    asal = serializers.SerializerMethodField()
+    tujuan = serializers.SerializerMethodField()
+
+    def get_asal(self, obj):
+        stasiun = Stasiun.objects.get(id_stasiun=self.context['asal'])
+        perjalanan_stasiun = obj.rangkaian_perjalanan.get(
+            stasiun=stasiun, jenis_perjalanan="B")
+
+        return {
+            'stasiun': {
+                'id_stasiun': stasiun.id_stasiun,
+                'nama_stasiun': stasiun.nama_stasiun
+            },
+            'waktu': perjalanan_stasiun.waktu
+        }
+
+    def get_tujuan(self, obj):
+        stasiun = Stasiun.objects.get(id_stasiun=self.context['tujuan'])
+        perjalanan_stasiun = obj.rangkaian_perjalanan.get(
+            stasiun=stasiun, jenis_perjalanan="D")
+
+        return {
+            'stasiun': {
+                'id_stasiun': stasiun.id_stasiun,
+                'nama_stasiun': stasiun.nama_stasiun
+            },
+            'waktu': perjalanan_stasiun.waktu
+        }
 
     class Meta:
         model = LayananKereta
