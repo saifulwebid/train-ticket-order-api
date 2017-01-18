@@ -1,84 +1,161 @@
-from rest_framework import generics,viewsets,views, status
+from rest_framework import generics, status
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from .models import *
 from .serializers import *
-import datetime
-from django.db import connection
-from rest_framework.response import Response
-from time import gmtime, strftime
+from datetime import datetime
+from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
-class StasiunList(generics.ListCreateAPIView):
+
+class StasiunList(generics.ListAPIView):
     queryset = Stasiun.objects.all()
     serializer_class = StasiunSerializer
 
-class StasiunDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Stasiun.objects.all()
-    serializer_class = StasiunSerializer
 
-class LayananKeretaDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = LayananKereta.objects.all()
-    serializer_class = LayananKeretaSerializer
-
-class RangkaianPerjalananList(generics.ListAPIView):
-    serializer_class = RangkaianPerjalananSerializer
-
-    def get_queryset(self):
-        tahun = int(self.kwargs['tahun'])
-        bulan = int(self.kwargs['bulan'])
-        hari = int(self.kwargs['hari'])
-        besok = hari + 1
-        asal_id = self.kwargs['asal_id']
-        tujuan_id = self.kwargs['tujuan_id']
-        layanan = RangkaianPerjalanan.objects.raw("""SELECT *
-                                         FROM rangkaian_perjalanan
-                                         WHERE (
-                                         jenis_perjalanan =  'B'
-                                         AND id_stasiun =  %s
-                                         AND waktu BETWEEN STR_TO_DATE(  '%s/%s/%s',  '%%Y/%%m/%%d' )
-                                         AND STR_TO_DATE(  '%s/%s/%s',  '%%Y/%%m/%%d' )
-                                         )
-                                         OR (
-                                         jenis_perjalanan =  'D'
-                                         AND id_stasiun =  %s
-                                         AND waktu BETWEEN STR_TO_DATE(  '%s/%s/%s',  '%%Y/%%m/%%d' )
-                                         AND STR_TO_DATE(  '%s/%s/%s',  '%%Y/%%m/%%d' )
-                                            )
-                                         ORDER BY waktu
-                                    """,
-                                    [asal_id,tahun,bulan,hari,tahun,bulan,besok,tujuan_id,tahun,bulan,hari,tahun,bulan,besok])
-        return layanan
-
-class BookingDetail(generics.ListCreateAPIView):
-    serializer_class = BookingSerializer
-
-    def get_queryset(self):
-        kode_pembayaran = int(self.kwargs['pembayaran'])
-        booking = Booking.objects.raw("""SELECT *
-                                         FROM booking b, pembayaran p
-                                         WHERE b.kode_booking = p.kode_booking AND p.kode_pembayaran = %s""",
-                                         [kode_pembayaran])
-        return booking
-
-class BookingList(generics.ListCreateAPIView):
-    queryset = Booking.objects.all()
-    serializer_class = BookingSerializer
-
-class PemesanList(generics.ListCreateAPIView):
-    queryset = Pemesan.objects.all()
-    serializer_class = PemesanSerializer
-
-
-class PenumpangList(generics.ListCreateAPIView):
-    queryset = Penumpang.objects.all()
-    serializer_class = PenumpangSerializer
-
-class CaraBayarList(generics.ListCreateAPIView):
+class CaraBayarList(generics.ListAPIView):
     queryset = CaraBayar.objects.all()
     serializer_class = CaraBayarSerializer
 
-class PembayaranList(generics.ListCreateAPIView):
-    queryset = Pembayaran.objects.all()
-    serializer_class = PembayaranSerializer
 
-class PembayaranDetail(generics.RetrieveUpdateDestroyAPIView):
+class CaraBayarDariBooking(generics.GenericAPIView):
+    def get_serializer_class(self):
+        if self.request.method == "GET":
+            return CaraBayarSerializer
+
+        return WritePembayaranSerializer
+
+    def get(self, request, pk, *args, **kwargs):
+        try:
+            booking = Booking.objects.get(kode_booking=int(pk))
+            queryset = Pembayaran.objects.get(booking=booking).cara_bayar
+        except ObjectDoesNotExist:
+            return Response(
+                {"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = CaraBayarSerializer(queryset)
+        return Response(serializer.data)
+
+    def post(self, request, pk, *args, **kwargs):
+        try:
+            booking = Booking.objects.get(kode_booking=int(pk))
+        except ObjectDoesNotExist:
+            return Response(
+                {"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if hasattr(booking, 'pembayaran'):
+            return Response(
+                {"detail": "Pembayaran already exists."},
+                status=status.HTTP_409_CONFLICT)
+
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(
+                booking=booking,
+                waktu_penagihan=timezone.now())
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LayananKeretaDetail(generics.RetrieveAPIView):
+    queryset = LayananKereta.objects.all()
+    serializer_class = LayananKeretaSerializer
+
+
+class BookingList(generics.CreateAPIView):
+    queryset = Booking.objects.all()
+    serializer_class = WriteBookingSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(waktu_mulai_booking=timezone.now())
+
+
+class BookingDetail(generics.RetrieveAPIView):
+    queryset = Booking.objects.all()
+    serializer_class = BookingSerializer
+
+
+class PemesanDetail(
+        generics.RetrieveAPIView):
+    queryset = Pemesan.objects.all()
+    serializer_class = PemesanSerializer
+
+    def post(self, request, pk, *args, **kwargs):
+        booking = Booking.objects.get(kode_booking=pk)
+
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(booking=booking)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PenumpangDetail(generics.ListCreateAPIView):
+    kode_booking = None
+    serializer_class = PenumpangSerializer
+
+    def get_queryset(self):
+        return Booking.objects.get(
+            kode_booking=self.kode_booking).penumpang.all()
+
+    def get(self, request, pk, *args, **kwargs):
+        self.kode_booking = pk
+        return self.list(request, *args, **kwargs)
+
+    def create(self, request, pk, *args, **kwargs):
+        self.kode_booking = pk
+        booking = Booking.objects.get(kode_booking=pk)
+
+        is_many = isinstance(request.data, list)
+        serializer = self.get_serializer(data=request.data, many=is_many)
+        if serializer.is_valid():
+            serializer.save(booking=booking)
+            headers = self.get_success_headers(serializer.data)
+            print(repr(headers))
+            return Response(serializer.data, status=status.HTTP_201_CREATED,
+                            headers=headers)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CariLayananKereta(APIView):
+    def get(self, request,
+            tahun, bulan, tanggal, asal, tujuan, format=None):
+        tahun = int(tahun)
+        bulan = int(bulan)
+        tanggal = int(tanggal)
+
+        tz = timezone.get_current_timezone()
+        tanggal_berangkat = datetime(tahun, bulan, tanggal, tzinfo=tz)
+        tanggal_berangkat = tanggal_berangkat.astimezone(tz=timezone.utc)
+        tanggal_berangkat = tanggal_berangkat.replace(tzinfo=None)
+
+        queryset = LayananKereta.cari(tanggal_berangkat, asal, tujuan)
+        serializer = LayananKeretaSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class BayarBooking(generics.GenericAPIView):
     queryset = Pembayaran.objects.all()
-    serializer_class = PembayaranSerializer
+    serializer_class = BayarBookingSerializer
+
+    def post(self, request, *args, **kwargs):
+        try:
+            pembayaran = Pembayaran.objects.get(
+                kode_pembayaran=request.data.get("kode_pembayaran"))
+        except ObjectDoesNotExist:
+            pembayaran = None
+
+        serializer = BayarBookingSerializer(pembayaran, data=request.data)
+        if serializer.is_valid():
+            serializer.save(waktu_pembayaran=timezone.now())
+
+            pembayaran = Pembayaran.objects.get(
+                kode_pembayaran=request.data.get("kode_pembayaran"))
+            response_serializer = PembayaranSerializer(pembayaran)
+            return Response(
+                response_serializer.data, status=status.HTTP_202_ACCEPTED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -1,74 +1,99 @@
 from rest_framework import serializers
 from .models import *
-import datetime
+from django.core.exceptions import ObjectDoesNotExist
 
-
-class StasiunSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Stasiun
-        fields = '__all__'
 
 class KeretaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Kereta
         fields = '__all__'
 
+
 class LayananKeretaSerializer(serializers.ModelSerializer):
+    kereta = KeretaSerializer()
+    rangkaian_perjalanan = RangkaianPerjalanan()
+    sisa_kursi = serializers.IntegerField()
+
     class Meta:
         model = LayananKereta
         fields = '__all__'
-        depth = 1
 
-
-class PemesanSerializer(serializers.ModelSerializer):
-    kode_booking = serializers.PrimaryKeyRelatedField(queryset=Booking.objects.all())
-
-    def validate_kode_booking(self,values):
-        booking = Booking.objects.get(kode_booking = values.kode_booking)
-
-        if((datetime.datetime.now() -booking.waktu_mulai_booking.replace(tzinfo=None)).total_seconds() > 600):
-            raise serializers.ValidationError("Waktu pengisian sudah melebihi ketentuan")
-        return values
-
-    class Meta:
-        model = Pemesan
-        fields = '__all__'
-
-class PenumpangSerializer(serializers.ModelSerializer):
-
-    def validate_kode_booking(self,values):
-        booking = Booking.objects.get(kode_booking = values.kode_booking)
-
-        if((datetime.datetime.now() -booking.waktu_mulai_booking.replace(tzinfo=None)).total_seconds() > 600):
-            raise serializers.ValidationError("Waktu pengisian sudah melebihi ketentuan")
-        return values
-
-    class Meta:
-        model = Penumpang
-        fields = '__all__'
-
-class PembayaranSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Pembayaran
-        fields = '__all__'
 
 class CaraBayarSerializer(serializers.ModelSerializer):
     class Meta:
         model = CaraBayar
         fields = '__all__'
 
+
+class WritePembayaranSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pembayaran
+        exclude = ('booking', 'waktu_pembayaran', 'waktu_penagihan')
+
+
+class BayarBookingSerializer(serializers.ModelSerializer):
+    kode_pembayaran = serializers.IntegerField()
+
+    def validate_kode_pembayaran(self, value):
+        try:
+            pembayaran = Pembayaran.objects.get(kode_pembayaran=value)
+        except ObjectDoesNotExist:
+            raise serializers.ValidationError(
+                "Kode pembayaran does not exists")
+
+        if pembayaran.waktu_pembayaran is not None:
+            raise serializers.ValidationError("Booking sudah dibayar")
+
+        return value
+
+    class Meta:
+        model = Pembayaran
+        fields = ('kode_pembayaran', )
+
+
+class PembayaranSerializer(serializers.ModelSerializer):
+    kode_booking = serializers.IntegerField(source='booking.kode_booking')
+
+    class Meta:
+        model = Pembayaran
+        exclude = ('booking', )
+        depth = 1
+
+
+class PemesanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pemesan
+        exclude = ('booking', )
+
+
+class PenumpangSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Penumpang
+        exclude = ('id_penumpang', 'booking', )
+
+
+class WriteBookingSerializer(serializers.ModelSerializer):
+    jumlah_penumpang = serializers.IntegerField(min_value=1, max_value=4)
+
+    class Meta:
+        model = Booking
+        exclude = ('waktu_mulai_booking', )
+
+
 class BookingSerializer(serializers.ModelSerializer):
-    penumpang = PenumpangSerializer(many = True,read_only = True, source='penumpang_set')
-    pemesan = PemesanSerializer(many = True,read_only = True,source='pemesan_set')
-    pembayaran = PembayaranSerializer(many = True,read_only = True,source='pembayaran_set')
+    pemesan = PemesanSerializer(read_only=True)
+    penumpang = PenumpangSerializer(many=True, read_only=True)
+    pembayaran = PembayaranSerializer(read_only=True)
+    layanan_kereta = LayananKeretaSerializer(read_only=True)
+    valid_status = serializers.BooleanField()
+
     class Meta:
         model = Booking
         fields = '__all__'
+        depth = 1
 
-class RangkaianPerjalananSerializer(serializers.ModelSerializer):
 
+class StasiunSerializer(serializers.ModelSerializer):
     class Meta:
-        model = RangkaianPerjalanan
+        model = Stasiun
         fields = '__all__'
-        depth = 3
