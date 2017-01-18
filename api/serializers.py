@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import *
+from django.utils import timezone
 
 
 class KeretaSerializer(serializers.ModelSerializer):
@@ -46,6 +47,12 @@ class PenumpangSerializer(serializers.ModelSerializer):
     class Meta:
         model = Penumpang
         fields = '__all__'
+
+
+class WriteBookingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Booking
+        exclude = ('waktu_mulai_booking', )
 
 
 class BookingSerializer(serializers.ModelSerializer):

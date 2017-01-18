@@ -24,7 +24,15 @@ class LayananKeretaDetail(generics.RetrieveAPIView):
 
 class BookingList(generics.ListCreateAPIView):
     queryset = Booking.objects.all()
-    serializer_class = BookingSerializer
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return WriteBookingSerializer
+
+        return BookingSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(waktu_mulai_booking=timezone.now())
 
 
 class BookingDetail(generics.RetrieveUpdateDestroyAPIView):
