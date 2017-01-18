@@ -76,8 +76,7 @@ class BookingDetail(generics.RetrieveAPIView):
     serializer_class = BookingSerializer
 
 
-class PemesanDetail(
-        generics.RetrieveAPIView):
+class PemesanDetail(generics.RetrieveAPIView):
     queryset = Pemesan.objects.all()
     serializer_class = PemesanSerializer
 
@@ -113,7 +112,6 @@ class PenumpangDetail(generics.ListCreateAPIView):
         if serializer.is_valid():
             serializer.save(booking=booking)
             headers = self.get_success_headers(serializer.data)
-            print(repr(headers))
             return Response(serializer.data, status=status.HTTP_201_CREATED,
                             headers=headers)
 
@@ -171,7 +169,6 @@ class CekKodeBooking(APIView):
                 {"detail": "Kode pembayaran tidak ditemukan."},
                 status=status.HTTP_404_NOT_FOUND)
 
-        pembayaran.booking.kode_booking
         if pembayaran.waktu_pembayaran is None:
             pembayaran.booking.kode_booking = None
 
