@@ -175,6 +175,7 @@ class CekKodeBooking(APIView):
         if pembayaran.waktu_pembayaran is None:
             pembayaran.booking.kode_booking = None
 
-        serializer = BookingSerializer(pembayaran.booking)
+        serializer = BookingSerializer(
+            pembayaran.booking, context={'cek-kode-booking': True})
 
         return Response(serializer.data)

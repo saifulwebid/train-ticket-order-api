@@ -87,8 +87,14 @@ class BayarBookingSerializer(serializers.ModelSerializer):
 
 
 class PembayaranSerializer(serializers.ModelSerializer):
-    kode_booking = serializers.IntegerField(source='booking.kode_booking')
+    kode_booking = serializers.SerializerMethodField()
     batas_akhir_pembayaran = serializers.DateTimeField()
+
+    def get_kode_booking(self, obj):
+        if obj.waktu_pembayaran is None:
+            return None
+
+        return obj.booking.kode_booking
 
     class Meta:
         model = Pembayaran
@@ -117,11 +123,19 @@ class WriteBookingSerializer(serializers.ModelSerializer):
 
 
 class BookingSerializer(serializers.ModelSerializer):
+    kode_booking = serializers.SerializerMethodField()
     pemesan = PemesanSerializer(read_only=True)
     penumpang = PenumpangSerializer(many=True, read_only=True)
     pembayaran = PembayaranSerializer(read_only=True)
     layanan_kereta = LayananKeretaSerializer(read_only=True)
     valid = serializers.BooleanField()
+
+    def get_kode_booking(self, obj):
+        if 'cek-kode-booking' in self.context:
+            if obj.pembayaran.waktu_pembayaran is None:
+                return None
+
+        return obj.kode_booking
 
     class Meta:
         model = Booking
