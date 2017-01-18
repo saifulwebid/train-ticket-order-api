@@ -51,6 +51,33 @@ class PemesanDetail(
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class PenumpangDetail(generics.ListCreateAPIView):
+    kode_booking = None
+    serializer_class = PenumpangSerializer
+
+    def get_queryset(self):
+        return Booking.objects.get(kode_booking=self.kode_booking).penumpang.all()
+
+    def get(self, request, pk, *args, **kwargs):
+        self.kode_booking = pk
+        return self.list(request, *args, **kwargs)
+
+    def create(self, request, pk, *args, **kwargs):
+        self.kode_booking = pk
+        booking = Booking.objects.get(kode_booking=pk)
+
+        is_many = isinstance(request.data, list)
+        serializer = self.get_serializer(data=request.data, many=is_many)
+        if serializer.is_valid():
+            serializer.save(booking=booking)
+            headers = self.get_success_headers(serializer.data)
+            print(repr(headers))
+            return Response(serializer.data, status=status.HTTP_201_CREATED,
+                            headers=headers)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class CariLayananKereta(APIView):
     def get(self, request,
             tahun, bulan, tanggal, asal, tujuan, format=None):

@@ -52,7 +52,7 @@ class WritePemesanSerializer(serializers.ModelSerializer):
 class PenumpangSerializer(serializers.ModelSerializer):
     class Meta:
         model = Penumpang
-        fields = '__all__'
+        exclude = ('id_penumpang', 'booking', )
 
 
 class WriteBookingSerializer(serializers.ModelSerializer):
