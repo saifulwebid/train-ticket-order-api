@@ -25,7 +25,7 @@ SECRET_KEY = '_b2%cf6$7^3nzshqbtv6=cenw2&&%6_##$w+1r002=5#_e!h1^'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [u'webdev16-order-kereta.herokuapp.com']
 
 
 # Application definition
