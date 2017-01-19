@@ -172,10 +172,10 @@ class CekKodeBooking(APIView):
                 {"detail": "Kode pembayaran tidak ditemukan."},
                 status=status.HTTP_404_NOT_FOUND)
 
-        if pembayaran.waktu_pembayaran is None:
-            pembayaran.booking.kode_booking = None
+        booking = Booking.objects.get(
+            kode_booking=pembayaran.booking.kode_booking)
 
         serializer = BookingSerializer(
-            pembayaran.booking, context={'cek-kode-booking': True})
+            booking, context={'cek-kode-booking': True})
 
         return Response(serializer.data)
